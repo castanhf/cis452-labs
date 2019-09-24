@@ -8,11 +8,11 @@
 
 #define MAX_THREADS 30
 
-int numFiles = 0; //keeps count of files sent
-int numServed = 0; //keeps count of files serviced
+int files = 0; //keeps count of files sent
+int served = 0; //keeps count of files serviced
 
 void* fileget(void* arg);
-void sigUsrHandler(int signNum);
+void usrHandler(int signNum);
 
 int main() {
   pthread_t threads[MAX_THREADS];
@@ -21,7 +21,7 @@ int main() {
   char* inputstr = input;
   int counter = 0; // count spot in threads
 
-  signal(SIGINT, sigUsrHandler); //creating SIGINT for termination
+  signal(SIGINT, usrHandler); //creating SIGINT for termination
 	
   // dispatcher reads user input, creates thread, detaches thread, and repeats
   while(1) {
@@ -44,7 +44,7 @@ int main() {
 
     // update counter
     counter < MAX_THREADS ? (counter++) : (counter = 0);
-    numFiles = numFiles + 1; //increment # of files sent		
+    files = files + 1; //increment # of files sent		
   }
   
   return 0;
@@ -62,18 +62,18 @@ void* fileget(void* arg) {
 
   //diagnostic message
   printf("\nThread got the string: %s\n", str);
-  numServed = numServed + 1; //increment # of files done
+  served = served + 1; //increment # of files done
 	
   free(str);
   return NULL;
 }
 
-void sigUsrHandler(int signNum) { 
-  //terminates when control c recieved
-  if (signNum == SIGINT){
+void usrHandler(int x) { 
+  //terminates when control c is recieved
+  if (x == SIGINT){
     printf("\n\nControl-c registered.\n");
-    printf("Number of file requests recieved: %d\n", numFiles);
-    printf("Number of file requests serviced: %d\n", numServed);
+    printf("Number of file requests recieved: %d\n", files);
+    printf("Number of file requests serviced: %d\n", served);
     printf("Exiting...\n\n");
     exit(0);
   }
