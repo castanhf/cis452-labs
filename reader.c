@@ -14,8 +14,6 @@ key_t key;
 int mId;
 char *mPtr;
 
-// temp
-int len;
 
 typedef struct {
   int turn;
@@ -66,18 +64,11 @@ int main() {
 /* Shut down process */
 void sigHandler(int num) {
   printf("\nThat's it, I'm shutting you down...\n");
-  
-  // detach from memory
-  if (shmdt (mPtr) < 0) {
-    perror ("just can't let go\n");
-    exit (1);
-  }
 
-  // destroy shared memory
-  if (shmctl (mId, IPC_RMID, 0) < 0) {
-    perror ("can't deallocate\n");
+  // Destroy shared memory
+  if (shmctl(mId, IPC_RMID, NULL) < 0) {
+    perror("Can't deallocate");
     exit(1);
   }
-
   exit(0);
 }

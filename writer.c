@@ -62,21 +62,17 @@ int main() {
   return 0;
 }
 
-/* Shut down process */
+
 void sigHandler(int num) {
-  printf("\nThat's it, I'm shutting you down...\n");
-  
-  // detach from memory
-  if (shmdt (mPtr) < 0) {
-    perror ("just can't let go\n");
-    exit (1);
+  printf("That's it, I'm shutting you down...\n");
+
+  if (num == SIGINT) {
+	// Detach
+    if (shmdt(mPtr) < 0) {
+      perror("Just can't let go\n");
+    }
   }
 
-  // destroy shared memory
-  if (shmctl (mId, IPC_RMID, 0) < 0) {
-    perror ("can't deallocate\n");
-    exit(1);
-  }
 
   exit(0);
 }
