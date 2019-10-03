@@ -14,6 +14,9 @@ key_t key;
 int mId;
 char *mPtr;
 
+// temp
+int len;
+
 typedef struct {
   int turn;
   char message[1024];
@@ -45,12 +48,13 @@ int main() {
       //not time for the reader, check if token is changed.
       memcpy(&data, mPtr, sizeof(DataShared));
     }
-    
+
     // enter critical section
     printf("Read from memory: %s\n", data.message);
-    
+
     // leave critical section
     data.turn = 0;
+
     memcpy(mPtr, &data, sizeof(DataShared));
   };
 
@@ -61,7 +65,7 @@ int main() {
 
 /* Shut down process */
 void sigHandler(int num) {
-  printf("That's it, I'm shutting you down...\n");
+  printf("\nThat's it, I'm shutting you down...\n");
   
   // detach from memory
   if (shmdt (mPtr) < 0) {

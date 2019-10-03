@@ -27,11 +27,13 @@ int main() {
   //generate a key
   key = ftok("mkey",65);
 
+  //returns an identifier in mId
   if((mId = shmget(key, 4096, IPC_CREAT|S_IRUSR|S_IWUSR)) < 0 ) {
     perror("Error creating shared memory\n");
     exit(1);
   }
 
+  // shmat to attach to shared memory
   if((mPtr = shmat(mId, 0, 0)) == (void*) -1) {
     perror("Can't attach\n");
     exit(1);
@@ -46,8 +48,9 @@ int main() {
     
     // enter critical section
     printf("Enter a message: \n" );
-    scanf("%s", data.message);
-    
+    //scanf("%s", data.message);
+    fgets(data.message, 1024, stdin);
+
     // leave critical section
     printf("Message written to memory: %s\n", data.message);
     data.turn = 1;
@@ -61,7 +64,7 @@ int main() {
 
 /* Shut down process */
 void sigHandler(int num) {
-  printf("That's it, I'm shutting you down...\n");
+  printf("\nThat's it, I'm shutting you down...\n");
   
   // detach from memory
   if (shmdt (mPtr) < 0) {
