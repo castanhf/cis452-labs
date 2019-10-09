@@ -28,22 +28,12 @@ int main (int argc, char *argv[])
    }
    loop = atoi(argv[1]);
 
-   // NEW: wait
-   sbuf[0].sem_num = 0;
-   sbuf[0].sem_op  = -1;
-   sbuf[0].sem_flg = 0;
-
-   // NEW: signal
-   sbuf[1].sem_num = 0;
-   sbuf[1].sem_op = 1; // increment
-   sbuf[1].sem_flg = 0;
-
-   // NEW: create semaphore set
+   // create semaphore set
    if((semId = semget(IPC_PRIVATE, 1, 00600)) < 0) {
       perror("semget() call failed, could not create semaphore!\n");
       exit(1);
    }
-   // NEW: initialize semaphore
+   // initialize semaphore
    if((semctl(semId, 0, SETVAL, 1)) < 0) {
       perror("semop() call failed, could not initialize semaphore!\n");
       exit(1);
@@ -61,13 +51,26 @@ int main (int argc, char *argv[])
    shmPtr[0] = 0;
    shmPtr[1] = 1;
 
+   // initialize sbuf variables
+   // sbuf[0]
+   sbuf[0].sem_num = 0;
+   sbuf[0].sem_op = -1;
+   sbuf[0].sem_flg = 0;
+
+   // sbuf[1]
+   sbuf[1].sem_num = 0;
+   sbuf[1].sem_op = 1;
+   sbuf[1].sem_flg = 0;
+
    if (!(pid = fork())) {
-      // NEW: semop(semId, &sbuf, 2);
       for (i=0; i<loop; i++) {
+	 semop(semId, &sbuf[0], 1);
                // swap the contents of shmPtr[0] and shmPtr[1]
 	 temp = shmPtr[0];
 	 shmPtr[0] = shmPtr[1];
 	 shmPtr[1] = temp;
+
+	 semop(semId, &sbuf[1], 1);
       }
       if (shmdt (shmPtr) < 0) {
          perror ("just can't let go\n");
@@ -77,10 +80,13 @@ int main (int argc, char *argv[])
    }
    else
       for (i=0; i<loop; i++) {
+	 semop(semId, &sbuf[0], 1);
                // swap the contents of shmPtr[1] and shmPtr[0]
 	 temp = shmPtr[1];
 	 shmPtr[1] = shmPtr[0];
 	 shmPtr[0] = temp;
+
+	 semop(semId, &sbuf[1], 1);
       }
 
    wait (&status);
@@ -97,8 +103,8 @@ int main (int argc, char *argv[])
       exit(1);
    }
 
-   // NEW: Delete semaphore
-   if(semctl(semId, 0, IPC_RMID) != 0) {
+   // Delete semaphore
+   if(semctl(semId, 0, IPC_RMID) < 0) {
       perror("Could not remove/destroy semaphore \n");
       exit(1);
    }
