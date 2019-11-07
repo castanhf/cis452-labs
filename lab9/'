@@ -25,7 +25,7 @@ int main() {
 	char* chunk;
 	char* state;
 
-	// TODO: does not understand error
+	// TODO
 	// how much M installed
 	PULONGLONG memKb;
     	GetPhysicallyInstalledSystemMemory(memKb);
