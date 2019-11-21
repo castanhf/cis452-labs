@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
         while ((entry_ptr = readdir(dir_ptr))) {
           struct stat st;
           stat((entry_ptr->d_name), &st);
-          printf("%-20s inode: %lu\n", entry_ptr->d_name, st.st_ino);
+          printf("%-20s inode: %lu\n", entry_ptr->d_name, entry_ptr->d_ino);
         }
         break;
       case '?':
